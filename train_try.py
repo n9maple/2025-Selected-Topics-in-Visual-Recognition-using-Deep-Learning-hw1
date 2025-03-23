@@ -10,6 +10,7 @@ import time
 from FocalLoss import FocalLoss
 from Dataset import TrainDataset
 import numpy as np
+import os
 
 def train_and_validate(model, train_loader, val_loader, criterion, optimizer, scheduler, num_epochs, save_dir, device):
     best_acc = 0.0
@@ -70,8 +71,8 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
         
         print(f"Current Learning Rate: {optimizer.param_groups[0]['lr']:.6f}")
     
-    np.save("train_losses.npy", np.array(train_losses))
-    np.save("val_losses.npy", np.array(val_losses))
+    np.save(f"{save_dir}/train_losses.npy", np.array(train_losses))
+    np.save(f"{save_dir}/val_losses.npy", np.array(val_losses))
     print("Training and validation losses saved!")
 
 if __name__ == "__main__":
@@ -81,10 +82,16 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
     parser.add_argument("--criterion", type=str, choices=["cross_entropy", "focal"], default="focal", help="Loss function")
     parser.add_argument("--dropout", type=str, choices=["on", "off"], default="on", help="Add dropout layer before the output layer")
-    parser.add_argument("--save_dir", type=str, default="save_model", help="Save model to the directory")
+    parser.add_argument("--train_data_dir", type=str, default="data/train", help="The directory where the train data are")
+    parser.add_argument("--val_data_dir", type=str, default="data/val", help="The directory where the validation data are")
+    parser.add_argument("--save_dir", type=str, default="save_result", help="Save model and result to the directory")
+    parser.add_argument("--device", type=str, default="cuda", help="Choose the device to train")
     args = parser.parse_args()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = args.device
+
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
 
     train_transforms = transforms.Compose([
         transforms.RandomResizedCrop(500),
@@ -100,8 +107,8 @@ if __name__ == "__main__":
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    train_dataset = TrainDataset(data_dir="data/train", transform=train_transforms)
-    val_dataset = TrainDataset(data_dir="data/val", transform=val_transforms)
+    train_dataset = TrainDataset(data_dir=args.train_data_dir, transform=train_transforms)
+    val_dataset = TrainDataset(data_dir=args.val_data_dir, transform=val_transforms)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
 
