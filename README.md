@@ -50,7 +50,7 @@ conda activate hw1
 python train.py
 ```
 
-3. Run the inference code and give the path of the model weight (in default, it will be in *'save_model'* directory). If the path is not given, it will find *'save_model/model_epoch19'*. You may download the weight from the link: https://drive.google.com/file/d/1jN02eioHV0dEsW-YuYEvqSWs3rjDGBEy/view?usp=sharing
+3. Run the inference code and give the path of the model weight (in default, it will be in *'save_model'* directory). If the path is not given, it will find *'save_model/model_epoch19.pth'*. You may download the weight from the link: https://drive.google.com/file/d/1jN02eioHV0dEsW-YuYEvqSWs3rjDGBEy/view?usp=sharing
 
 ```bash
 python inference.py --model_path [your_model_path]
