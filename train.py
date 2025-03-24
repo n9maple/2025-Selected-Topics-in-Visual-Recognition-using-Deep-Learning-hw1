@@ -67,12 +67,12 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
 
         if val_acc > best_acc:
             best_acc = val_acc
-        torch.save(model.state_dict(), f"{save_dir}/model_epoch{epoch}.pth")
+        torch.save(model.state_dict(), os.path.join(save_dir, f'model_epoch{epoch}.pth'))
         
         print(f"Current Learning Rate: {optimizer.param_groups[0]['lr']:.6f}")
     
-    np.save(f"{save_dir}/train_losses.npy", np.array(train_losses))
-    np.save(f"{save_dir}/val_losses.npy", np.array(val_losses))
+    np.save(os.path.join(save_dir, 'train_losses.npy'), np.array(train_losses))
+    np.save(os.path.join(save_dir, 'val_losses.npy'), np.array(val_losses))
     print("Training and validation losses saved!")
 
 if __name__ == "__main__":
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs")
     parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
     parser.add_argument("--criterion", type=str, choices=["cross_entropy", "focal"], default="focal", help="Loss function")
-    parser.add_argument("--dropout", type=str, choices=["on", "off"], default="on", help="Add dropout layer before the output layer")
+    parser.add_argument("--nodropout", action="store_true", help="Delete the dropout layer if on")
     parser.add_argument("--train_data_dir", type=str, default="data/train", help="The directory where the train data are")
     parser.add_argument("--val_data_dir", type=str, default="data/val", help="The directory where the validation data are")
     parser.add_argument("--save_dir", type=str, default="save_result", help="Save model and result to the directory")
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
     print("Loading model...")
     model = models.resnet152(weights=ResNet152_Weights.IMAGENET1K_V2)
-    if args.dropout == "on":
+    if not args.nodropout:
         model.fc = nn.Sequential(nn.Dropout(p=0.5, inplace=True), nn.Linear(model.fc.in_features, 100))
     else:
         model.fc = nn.Linear(model.fc.in_features, 100)
