@@ -3,7 +3,7 @@ Student id: 313551056
 Name: 王力得
 
 ## Introduction
-This repository implement a 100-class classification task with Resnet-152. It may achieve 90.33% accuracy on validation data and 95% accuracy on public test data.
+This repository implement a 100-class classification task with Resnet-152. It may achieve 92% accuracy on validation data and 95% accuracy on public test data.
 ## Installation
 This project runs on python version 3.10.16 with cuda 12.4. It is recommended to use Conda to create a virtual environment.
 
