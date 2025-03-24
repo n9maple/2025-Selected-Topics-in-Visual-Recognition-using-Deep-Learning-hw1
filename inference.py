@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     predictions = []
     with torch.no_grad():
-        for images, image_names in tqdm(test_loader, desc="Predicting Test Data"):
+        for images, image_names in tqdm(test_loader, desc="Predicting Data"):
             images = images.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs, 1)
@@ -59,6 +59,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(predictions, columns=["image_name", "pred_label"])
     if args.validation:
         df.to_csv(os.path.join(args.save_dir, "val_prediction.csv"), index=False)
+        print("Predictions saved to val_prediction.csv!")
     else:
         df.to_csv(os.path.join(args.save_dir, "prediction.csv"), index=False)
-    print("Predictions saved to prediction.csv!")
+        print("Predictions saved to prediction.csv!")

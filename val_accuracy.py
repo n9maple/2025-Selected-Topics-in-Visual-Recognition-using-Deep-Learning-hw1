@@ -16,7 +16,7 @@ def calculate_accuracy(prediction_file, groundtruth_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pred_path", type=str, default='val_predictions.csv', help="The path of predicion file (it will be named 'val_predictions.csv' by default)")
+    parser.add_argument("--pred_path", type=str, default='val_prediction.csv', help="The path of predicion file (it will be named 'val_prediction.csv' by default)")
     parser.add_argument("--grond_path", type=str, default='val_groundtruth.csv', help="The path of groundtruth file (it will be named 'val_groundtruth.csv' by default)")
     args = parser.parse_args()
 

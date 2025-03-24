@@ -50,17 +50,32 @@ conda activate hw1
 python train.py
 ```
 
-3. Run the inference code and give the path of the model weight (in default, it will be in *'save_model'* directory). If the path is not given, it will find *'save_model/model_epoch19'*
+3. Run the inference code and give the path of the model weight (in default, it will be in *'save_model'* directory). If the path is not given, it will find *'save_model/model_epoch19'*. You may download the weight from the link: https://drive.google.com/file/d/1jN02eioHV0dEsW-YuYEvqSWs3rjDGBEy/view?usp=sharing
 
 ```bash
-python inference.py 
+python inference.py --model_path [your_model_path]
 ```
 
 4. (optional) If you want to inference on validation data, run the following code:
 
 ```bash
 python val_to_test.py
-python inference.py --test_data_dir ./data/val_alls
+python inference.py --test_data_dir ./data/val_all --model_path [your_model_path] --validation
+python val_accuracy.py
 ```
 
 ## Performance Snapshot 
+<figure style="text-align: center;">
+  <img src="images/learn_curve_AB.png" width="500">
+  <figcaption><b>The learning curve of configuration A and B</b></figcaption>
+</figure>
+
+<figure style="text-align: center;">
+  <img src="images/learn_curve_C.png" width="500">
+  <figcaption><b>The learning curve of configuration C</b></figcaption>
+</figure>
+
+<figure style="text-align: center;">
+  <img src="images/accuracy_curve.png" width="500">
+  <figcaption><b>The accuracy curve of all configurations</b></figcaption>
+</figure>
