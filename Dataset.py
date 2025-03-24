@@ -2,20 +2,23 @@ import os
 from PIL import Image
 from torch.utils.data import Dataset
 
+
 class TrainDataset(Dataset):
     def __init__(self, data_dir, transform=None):
         self.data_dir = data_dir
         self.transform = transform
-        self.class_to_idx = {class_name: int(class_name) for class_name in os.listdir(data_dir)}
-        
+        self.class_to_idx = {
+            class_name: int(class_name) for class_name in os.listdir(data_dir)
+        }
+
         self.image_paths = []
         self.labels = []
-        
+
         for class_name, label in self.class_to_idx.items():
             class_path = os.path.join(data_dir, class_name)
             if not os.path.isdir(class_path):
                 continue
-            
+
             for img_name in sorted(os.listdir(class_path)):
                 self.image_paths.append(os.path.join(class_path, img_name))
                 self.labels.append(label)
@@ -27,12 +30,13 @@ class TrainDataset(Dataset):
         img_path = self.image_paths[idx]
         label = self.labels[idx]
         image = Image.open(img_path).convert("RGB")
-        
+
         if self.transform:
             image = self.transform(image)
-        
+
         return image, label
-    
+
+
 class TestDataset(Dataset):
     def __init__(self, image_folder, transform=None):
         self.image_folder = image_folder

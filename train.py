@@ -12,7 +12,18 @@ from Dataset import TrainDataset
 import numpy as np
 import os
 
-def train_and_validate(model, train_loader, val_loader, criterion, optimizer, scheduler, num_epochs, save_dir, device):
+
+def train_and_validate(
+    model,
+    train_loader,
+    val_loader,
+    criterion,
+    optimizer,
+    scheduler,
+    num_epochs,
+    save_dir,
+    device,
+):
     best_acc = 0.0
     train_losses = []
     val_losses = []
@@ -24,7 +35,9 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
 
         print(f"\nEpoch {epoch+1}/{num_epochs} - Training...")
         start_time = time.time()
-        train_progress = tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}", unit="batch")
+        train_progress = tqdm(
+            train_loader, desc=f"Epoch {epoch+1}/{num_epochs}", unit="batch"
+        )
 
         for images, labels in train_progress:
             images, labels = images.to(device), labels.to(device)
@@ -33,23 +46,29 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-            
+
             running_loss += loss.item()
             _, predicted = outputs.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
-            
-            train_progress.set_postfix(loss=running_loss / (train_progress.n + 1), acc=100.0 * correct / total)
+
+            train_progress.set_postfix(
+                loss=running_loss / (train_progress.n + 1), acc=100.0 * correct / total
+            )
 
         train_loss = running_loss / len(train_loader)
         train_losses.append(train_loss)
         train_acc = 100.0 * correct / total
-        print(f"Epoch {epoch+1} Completed - Train Acc: {train_acc:.2f}% - Time: {time.time() - start_time:.1f}s")
+        print(
+            f"Epoch {epoch+1} Completed - Train Acc: {train_acc:.2f}% - Time: {time.time() - start_time:.1f}s"
+        )
 
         model.eval()
         val_loss, correct, total = 0.0, 0, 0
         with torch.no_grad():
-            val_progress = tqdm(val_loader, desc=f"Validating Epoch {epoch+1}", unit="batch")
+            val_progress = tqdm(
+                val_loader, desc=f"Validating Epoch {epoch+1}", unit="batch"
+            )
             for images, labels in val_progress:
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
@@ -58,7 +77,7 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
                 _, predicted = outputs.max(1)
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
-        
+
         val_loss /= len(val_loader)
         val_losses.append(val_loss)
         val_acc = 100.0 * correct / total
@@ -67,25 +86,55 @@ def train_and_validate(model, train_loader, val_loader, criterion, optimizer, sc
 
         if val_acc > best_acc:
             best_acc = val_acc
-        torch.save(model.state_dict(), os.path.join(save_dir, f'model_epoch{epoch}.pth'))
-        
+        torch.save(
+            model.state_dict(), os.path.join(save_dir, f"model_epoch{epoch}.pth")
+        )
+
         print(f"Current Learning Rate: {optimizer.param_groups[0]['lr']:.6f}")
-    
-    np.save(os.path.join(save_dir, 'train_losses.npy'), np.array(train_losses))
-    np.save(os.path.join(save_dir, 'val_losses.npy'), np.array(val_losses))
+
+    np.save(os.path.join(save_dir, "train_losses.npy"), np.array(train_losses))
+    np.save(os.path.join(save_dir, "val_losses.npy"), np.array(val_losses))
     print("Training and validation losses saved!")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
     parser.add_argument("--num_epochs", type=int, default=20, help="Number of epochs")
-    parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
-    parser.add_argument("--criterion", type=str, choices=["cross_entropy", "focal"], default="focal", help="Loss function")
-    parser.add_argument("--nodropout", action="store_true", help="Delete the dropout layer if on")
-    parser.add_argument("--train_data_dir", type=str, default="data/train", help="The directory where the train data are")
-    parser.add_argument("--val_data_dir", type=str, default="data/val", help="The directory where the validation data are")
-    parser.add_argument("--save_dir", type=str, default="save_result", help="Save model and result to the directory")
-    parser.add_argument("--device", type=str, default="cuda", help="Choose the device to train")
+    parser.add_argument(
+        "--learning_rate", type=float, default=0.0001, help="Learning rate"
+    )
+    parser.add_argument(
+        "--criterion",
+        type=str,
+        choices=["cross_entropy", "focal"],
+        default="focal",
+        help="Loss function",
+    )
+    parser.add_argument(
+        "--nodropout", action="store_true", help="Delete the dropout layer if on"
+    )
+    parser.add_argument(
+        "--train_data_dir",
+        type=str,
+        default="data/train",
+        help="The directory where the train data are",
+    )
+    parser.add_argument(
+        "--val_data_dir",
+        type=str,
+        default="data/val",
+        help="The directory where the validation data are",
+    )
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default="save_result",
+        help="Save model and result to the directory",
+    )
+    parser.add_argument(
+        "--device", type=str, default="cuda", help="Choose the device to train"
+    )
     args = parser.parse_args()
 
     device = args.device
@@ -93,35 +142,65 @@ if __name__ == "__main__":
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    train_transforms = transforms.Compose([
-        transforms.RandomResizedCrop(500),
-        transforms.RandomHorizontalFlip(),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-        transforms.RandomRotation(15),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    val_transforms = transforms.Compose([
-        transforms.CenterCrop([500, 500]),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    train_transforms = transforms.Compose(
+        [
+            transforms.RandomResizedCrop(500),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+            transforms.RandomRotation(15),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+    val_transforms = transforms.Compose(
+        [
+            transforms.CenterCrop([500, 500]),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
-    train_dataset = TrainDataset(data_dir=args.train_data_dir, transform=train_transforms)
+    train_dataset = TrainDataset(
+        data_dir=args.train_data_dir, transform=train_transforms
+    )
     val_dataset = TrainDataset(data_dir=args.val_data_dir, transform=val_transforms)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4
+    )
 
     print("Loading model...")
     model = models.resnet152(weights=ResNet152_Weights.IMAGENET1K_V2)
     if not args.nodropout:
-        model.fc = nn.Sequential(nn.Dropout(p=0.5, inplace=True), nn.Linear(model.fc.in_features, 100))
+        model.fc = nn.Sequential(
+            nn.Dropout(p=0.5, inplace=True), nn.Linear(model.fc.in_features, 100)
+        )
     else:
         model.fc = nn.Linear(model.fc.in_features, 100)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.1) if args.criterion == "cross_entropy" else FocalLoss(gamma=2).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=1e-2)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.1, verbose=True)
+    criterion = (
+        nn.CrossEntropyLoss(label_smoothing=0.1)
+        if args.criterion == "cross_entropy"
+        else FocalLoss(gamma=2).to(device)
+    )
+    optimizer = optim.AdamW(
+        model.parameters(), lr=args.learning_rate, weight_decay=1e-2
+    )
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", patience=3, factor=0.1, verbose=True
+    )
 
-    train_and_validate(model, train_loader, val_loader, criterion, optimizer, scheduler, args.num_epochs, args.save_dir, device)
+    train_and_validate(
+        model,
+        train_loader,
+        val_loader,
+        criterion,
+        optimizer,
+        scheduler,
+        args.num_epochs,
+        args.save_dir,
+        device,
+    )
