@@ -19,7 +19,7 @@ conda create -n hw1 python=3.10.16
 
 ```bash
 conda activate hw1
-pip install requirements.txt # Make sure you are using cuda 12.4
+pip install -r requirements.txt # Make sure you are using cuda 12.4
 ```
 
 ## Run the code
